@@ -1,7 +1,7 @@
 version: "3.8"
 
 services:
-#MariaDB Container
+#Contenaire MariaDB
   mariadb:
     image: mariadb:10.7
     restart: always
@@ -15,7 +15,7 @@ services:
       - MARIADB_USER=glpi_user
       - MARIADB_PASSWORD=glpi
 
-#GLPI Container
+#Contenaire GLPI
   glpi:
     image: diouxx/glpi
     restart: always
