@@ -1,0 +1,159 @@
+===== Installation et configuration du serveur web =====
+
+Installation des paquets qui composent l’ensemble du serveur web (Nginx, PHP7 et MariaDB) :
+
+# apt install nginx php7.0-fpm mariadb-server php7.0-curl php7.0-gd php7.0-mysql php7.0-cli php7.0-imap php7.0-ldap php7.0-apcu php7.0-xmlrpc php7.0-mbstring php7.0-xml php7.0-xmlrpc
+
+Sécuriser MariaDB :
+
+# mysql_secure_installation
+
+Création d’un utilisateur et la base de données pour le futur GLPI :
+Se connecter au serveur de base de données MariaDB :
+
+# mysql -u root -p
+
+Création d’un utilisateur pour l’accès à la future base de GLPI :
+
+# CREATE USER 'user-glpi'@'%' IDENTIFIED BY 'MON-MDP';
+
+Création de la future base de GLPI :
+
+# CREATE DATABASE glpi;
+
+Donner les droits au compte utilisateur à la base de GLPI :
+
+# GRANT ALL PRIVILEGES ON glpi.* TO 'user-glpi'@'%';
+
+Recharger les privilèges pour la prise en compte des modifications :
+
+# FLUSH PRIVILEGES;
+
+Quitter :
+
+# Quit;
+
+==== Configuration de PHP7 : ====
+
+Éditer le fichier /etc/php/7.0/fpm/pool.d/www.conf :
+
+# nano [[/etc/php/7.0/fpm/pool.d/www.conf]]
+
+Modifier la ligne 36 par :
+
+# listen = 127.0.0.1:9000
+
+Éditer le fichier /etc/php/7.0/fpm/php.ini :
+
+# nano /etc/php/7.0/fpm/php.ini
+
+Dé-commenter la ligne 760 :/
+
+# cgi.fix_pathinfo=0
+
+Configuration de Nginx pour GLPI :
+Supprimer le block server par défaut :
+
+# rm /etc/nginx/sites-enabled/default
+
+Créer le serveur block pour GLPI :
+
+# nano [[/etc/nginx/sites-enabled/glpi]]
+
+Le contenu :
+
+		server {
+				listen   80 default_server;
+				root /var/www/html;
+				index index.php;
+				server_name localhost;
+
+				location / {try_files $uri $uri/ index.php;}
+
+				#prise en charge PHP
+				location ~ \.php$ {
+				fastcgi_pass 127.0.0.1:9000;
+				fastcgi_index index.php;
+				include /etc/nginx/fastcgi_params;
+				fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+				include fastcgi_params;
+				fastcgi_param SERVER_NAME $host;
+								   }
+		}
+
+Relancer les services Nginx et php-fpm :
+
+# systemctl restart nginx
+# systemctl restart php7.0-fpm
+
+===== Installation de GLPI =====
+
+Se placer dans l’arborescence du serveur web :
+
+# cd /var/www/html/
+
+Téléchargement de la dernière version de GLPI en date :
+
+wget https://github.com/glpi-project/glpi/releases/download/9.3.0/glpi-9.3.tgz
+
+Décompresser l’archive de GLPI :
+
+# tar xzvf glpi-9.3.tgz
+
+Supprimer l’archive téléchargée :
+
+# rm glpi-9.3.tgz
+
+Changer les droits :
+
+# chgrp www-data /var/www/html/glpi/{config,files,files/_{dumps,sessions,cron,graphs,lock,plugins,tmp,rss,uploads,pictures,log}}
+
+Ouvrir un navigateur internet et saisir l’url du serveur web : http://IP_du_serveur_web/glpi
+
+Sélection la langue :
+
+{{~\Img\GLPI\1.png}}
+
+Accepter les termes de la licence libre :
+
+{{~\Img\GLPI\2.png}}
+
+Cliquer sur installer :
+
+{{~\Img\GLPI\3.png}}
+
+Si tout est dans le vert, cliquer sur Continuer :
+
+{{~\Img\GLPI\4.png}}
+
+Saisir les informations concernant les accès à la base de données de GLPI  soit Serv SQL (Localhost), User (user-glpi), Mdp (TON-MDP):
+
+{{~\Img\GLPI\5.png}}
+
+Sélectionner le base de données GLPI :
+
+{{~\Img\GLPI\6.png}}
+
+Cliquer sur Continuer :
+
+{{~\Img\GLPI\7.png}}
+
+Cliquer sur Continuer (vous pouvez décocher la case Envoyer « statistiques d’usage »)
+
+{{~\Img\GLPI\8.png}}
+
+Cliquer sur Utiliser GLPI :
+
+{{~\Img\GLPI\9.png}}
+
+Saisir les identifiants par défaut pour se conencter à l’interface web administration de GLPI : glpi/glpi
+
+{{~\Img\GLPI\10.png}}
+
+Vous êtes connecté à GLPI :
+
+{{~\Img\GLPI\11.png}}
+
+
+
+
