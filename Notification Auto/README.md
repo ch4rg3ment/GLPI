@@ -1,30 +1,45 @@
-GLPI 11 – Actions automatiques qui n’envoient pas les mails (Debian)
+# GLPI 11 – Actions automatiques qui n’envoient pas les mails (Debian)
+
+
 
 Fix via systemd timer (remplace le crontab).
 
-TL;DR
-
 Laisser les tâches GLPI en mode CLI (interface GLPI → Configuration → Actions automatiques).
+
+
 
 Créer un service et un timer systemd qui appellent front/cron.php.
 
-Fichiers systemd
 
-/etc/systemd/system/glpi-cron.service
+
+Création du fichier service :
+
+
+nano /etc/systemd/system/glpi-cron.service 
+
+
+Dans l'editeur de texte :
+
 
 [Unit]
-Description=GLPI automatic actions
+Description=GLPI actions automatique
 
 [Service]
 User=www-data
 Group=www-data
-# Empêche les chevauchements et loggue la sortie
-ExecStart=/usr/bin/flock -n /tmp/glpi-cron.lock /usr/bin/php /var/www/html/front/cron.php
-StandardOutput=append:/var/www/html/files/_log/cron.systemd.log
-StandardError=append:/var/www/html/files/_log/cron.systemd.log
+ExecStart=/usr/bin/php /var/www/html/front/cron.php
 
 
-/etc/systemd/system/glpi-cron.timer
+
+Création du fichier timer :
+
+
+nano /etc/systemd/system/glpi-cron.timer
+
+
+Dans l'editeur de texte :
+
+
 
 [Unit]
 Description=Run GLPI automatic actions every minute
@@ -36,12 +51,22 @@ Persistent=true
 [Install]
 WantedBy=timers.target
 
-Activation
+
+
+
+Activation du service :
+
+
 sudo systemctl daemon-reload
 sudo systemctl enable --now glpi-cron.timer
 sudo systemctl status glpi-cron.timer
 
+
+
 Tests & logs
+
+
+
 # Lancer une exécution immédiate
 sudo systemctl start glpi-cron.service
 
