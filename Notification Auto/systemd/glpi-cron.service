@@ -1,5 +1,5 @@
 [Unit]
-Description=GLPI automatic actions
+Description=GLPI actions automatique
 
 [Service]
 User=www-data
