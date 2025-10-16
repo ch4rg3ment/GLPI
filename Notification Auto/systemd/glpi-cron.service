@@ -1,0 +1,7 @@
+[Unit]
+Description=GLPI automatic actions
+
+[Service]
+User=www-data
+Group=www-data
+ExecStart=/usr/bin/php /var/www/html/front/cron.php
